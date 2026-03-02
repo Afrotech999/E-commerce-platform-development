@@ -7,9 +7,6 @@
     "dev": "vite",
     "dev:api": "cd backend && npm run dev",
     "dev:all": "concurrently \"npm run dev\" \"npm run dev:api\"",
-    // use npx to invoke the local vite binary instead of executing the file directly
-    // this avoids &#34;permission denied&#34; errors in environments where the
-    // executable bit isn&#39;t set (e.g. Vercel clones from Windows commits).
     "build": "npx vite build",
     "preview": "vite preview"
   },
