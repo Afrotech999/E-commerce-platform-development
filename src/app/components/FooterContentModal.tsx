@@ -26,11 +26,11 @@ const CONTENT: Record<string, { title: string; body: string }> = {
   },
   'about-us': {
     title: 'About Us',
-    body: 'DOKA is your destination for premium technology and lifestyle products. We curate quality devices and accessories to help you stay connected and productive. Founded with a focus on customer experience and authenticity.',
+    body: 'ClickSuq is your destination for premium technology and lifestyle products. We curate quality devices and accessories to help you stay connected and productive. Founded with a focus on customer experience and authenticity.',
   },
   careers: {
     title: 'Careers',
-    body: 'Join the DOKA team. We are always looking for talented people in sales, marketing, and operations. Send your resume to careers@doka.com with the subject line "Application – [Role]". We review applications on a rolling basis.',
+    body: 'Join the ClickSuq team. We are always looking for talented people in sales, marketing, and operations. Send your resume to careers@doka.com with the subject line "Application – [Role]". We review applications on a rolling basis.',
   },
   'privacy-policy': {
     title: 'Privacy Policy',
@@ -38,7 +38,7 @@ const CONTENT: Record<string, { title: string; body: string }> = {
   },
   'terms-of-service': {
     title: 'Terms of Service',
-    body: 'By using DOKA you agree to these terms. Products are subject to availability. We reserve the right to correct pricing errors. Limitation of liability applies as permitted by law. Governing law: Ethiopia. For full terms, contact legal@doka.com.',
+    body: 'By using ClickSuq you agree to these terms. Products are subject to availability. We reserve the right to correct pricing errors. Limitation of liability applies as permitted by law. Governing law: Ethiopia. For full terms, contact legal@doka.com.',
   },
 };
 
@@ -77,7 +77,7 @@ export function FooterContentModal({ slug, onClose }: FooterContentModalProps) {
           </p>
         </div>
 
-        <div className="shrink-0 px-8 sm:px-10 py-5 border-t border-gray-200/60 bg-gray-50/30 rounded-b-2xl flex justify-end">
+        {/* <div className="shrink-0 px-8 sm:px-10 py-5 border-t border-gray-200/60 bg-gray-50/30 rounded-b-2xl flex justify-end">
           <Button
             variant="outline"
             className="min-w-[100px] border-gray-300 hover:bg-gray-100 font-medium text-gray-700"
@@ -85,7 +85,7 @@ export function FooterContentModal({ slug, onClose }: FooterContentModalProps) {
           >
             Close
           </Button>
-        </div>
+        </div> */}
       </DialogContent>
     </Dialog>
   );

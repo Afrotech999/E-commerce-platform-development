@@ -71,7 +71,7 @@ export function AuthModal({ open, onOpenChange, defaultTab = 'login' }: AuthModa
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md p-0 gap-0">
         <DialogHeader className="border-b p-6 pb-4">
-          <DialogTitle>Sign in to DOKA</DialogTitle>
+          <DialogTitle>Sign in to ClickSuq</DialogTitle>
           <p className="text-sm text-gray-500">Access your profile and orders</p>
         </DialogHeader>
         <Tabs defaultValue={defaultTab} className="w-full">

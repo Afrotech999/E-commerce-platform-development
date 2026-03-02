@@ -1,10 +1,22 @@
-import { Search, User, Menu, LogOut, Home, Package, LayoutGrid, Tag, Recycle } from 'lucide-react';
+import {
+  Search,
+  User,
+  Menu,
+  LogOut,
+  Home,
+  Package,
+  LayoutGrid,
+  Tag,
+  Recycle,
+} from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from './ui/sheet';
 import { AuthModal } from './AuthModal';
 import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+
+import clicksuqLogo from '../../assets/clicksuq.png';
 
 interface HeaderProps {
   onNavigate: (page: string) => void;
@@ -29,10 +41,7 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
   }, [userMenuOpen]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -47,17 +56,40 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
     >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
-          {/* Logo */}
+          {/* ✅ LOGO FIX: force big size + crop transparent padding */}
           <motion.button
-            onClick={() => onNavigate('home')}
-            className="text-xl sm:text-2xl font-bold relative group px-6 py-2.5 rounded-full bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <span className="bg-gradient-to-r from-black via-gray-800 to-black bg-clip-text text-transparent">
-              DOKA
-            </span>
-          </motion.button>
+  onClick={() => onNavigate('home')}
+  whileHover={{ scale: 1.02 }}
+  whileTap={{ scale: 0.98 }}
+  aria-label="Go to home"
+  type="button"
+  style={{ display: 'flex', alignItems: 'center' }}
+>
+  <div
+    style={{
+      width: 140,          // ✅ wider so it won’t cut
+      height: 56,          // ✅ good for header
+      overflow: 'hidden',  // keep cropping transparent padding
+      display: 'flex',
+      alignItems: 'center',
+    }}
+  >
+    <img
+      src={clicksuqLogo}
+      alt="Clicksuq"
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',          // crops empty padding
+        objectPosition: 'left center',
+        transform: 'scale(1.15)',    // ✅ reduce scale so right side fits
+        transformOrigin: 'left center',
+        display: 'block',
+      }}
+      draggable={false}
+    />
+  </div>
+</motion.button>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-3 bg-gray-50 rounded-full px-2 py-2">
@@ -68,6 +100,7 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
                 className="text-sm font-medium text-gray-700 relative px-5 py-2.5 rounded-full hover:bg-white hover:shadow-sm transition-all"
                 whileHover={{ y: -1 }}
                 transition={{ duration: 0.2 }}
+                type="button"
               >
                 {item}
               </motion.button>
@@ -100,12 +133,15 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
                       className="h-10 w-10 rounded-full hover:bg-white hover:shadow-sm text-gray-700 transition-all overflow-hidden p-0"
                     >
                       <img
-                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&size=40`}
+                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          user.name
+                        )}&size=40`}
                         alt={user.name}
                         className="h-8 w-8 rounded-full object-cover"
                       />
                     </Button>
                   </motion.div>
+
                   <AnimatePresence>
                     {userMenuOpen && (
                       <motion.div
@@ -119,16 +155,26 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
                           <p className="font-medium text-sm truncate">{user.name}</p>
                           <p className="text-xs text-gray-500 truncate">{user.email}</p>
                         </div>
+
                         <button
-                          onClick={() => { onNavigate('profile'); setUserMenuOpen(false); }}
+                          onClick={() => {
+                            onNavigate('profile');
+                            setUserMenuOpen(false);
+                          }}
                           className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm hover:bg-gray-50"
+                          type="button"
                         >
                           <User className="h-4 w-4" />
                           Profile
                         </button>
+
                         <button
-                          onClick={() => { logout(); setUserMenuOpen(false); }}
+                          onClick={() => {
+                            logout();
+                            setUserMenuOpen(false);
+                          }}
                           className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
+                          type="button"
                         >
                           <LogOut className="h-4 w-4" />
                           Log out
@@ -150,6 +196,7 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
                 </motion.div>
               )}
             </div>
+
             <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
 
             {/* Mobile Menu */}
@@ -169,18 +216,21 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
                   </Button>
                 </motion.div>
               </SheetTrigger>
+
               <SheetContent
                 side="right"
                 className="w-full sm:w-[380px] max-w-[85vw] bg-white border-l border-gray-100 p-0 flex flex-col shadow-xl"
               >
                 <div className="flex flex-col h-full bg-white">
-                  {/* Menu header */}
                   <div className="px-6 pt-6 pb-4">
-                    <span className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">Navigation</span>
-                    <h2 className="mt-1 text-xl font-semibold tracking-tight text-gray-900">Menu</h2>
+                    <span className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">
+                      Navigation
+                    </span>
+                    <h2 className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
+                      Menu
+                    </h2>
                   </div>
 
-                  {/* Nav links */}
                   <nav className="flex-1 px-4 py-2 space-y-1 overflow-auto">
                     {[
                       { label: 'Home', path: 'home', icon: Home },
@@ -196,6 +246,7 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
                           initial={{ opacity: 0, x: -12 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.04 }}
+                          type="button"
                         >
                           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600">
                             <Icon className="h-4 w-4" />
@@ -205,7 +256,6 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
                       </SheetClose>
                     ))}
 
-                    {/* Account section */}
                     <div className="pt-4 mt-4 border-t border-gray-100">
                       {user ? (
                         <>
@@ -213,19 +263,24 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
                             <button
                               onClick={() => onNavigate('profile')}
                               className="w-full text-left px-4 py-3.5 rounded-xl text-[15px] font-medium text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-3"
+                              type="button"
                             >
                               <img
-                                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&size=36`}
+                                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                  user.name
+                                )}&size=96`}
                                 alt=""
                                 className="h-9 w-9 rounded-full bg-gray-100"
                               />
                               <span>{user.name}</span>
                             </button>
                           </SheetClose>
+
                           <SheetClose asChild>
                             <button
                               onClick={() => logout()}
                               className="w-full text-left px-4 py-3.5 rounded-xl text-[15px] font-medium text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3"
+                              type="button"
                             >
                               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50">
                                 <LogOut className="h-4 w-4" />
@@ -239,6 +294,7 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
                           <button
                             onClick={() => setAuthOpen(true)}
                             className="w-full text-left px-4 py-3.5 rounded-xl text-[15px] font-medium text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-3"
+                            type="button"
                           >
                             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100">
                               <User className="h-4 w-4 text-gray-600" />
@@ -250,9 +306,8 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
                     </div>
                   </nav>
 
-                  {/* Footer */}
                   <div className="px-6 py-5 border-t border-gray-100 bg-gray-50/80">
-                    <p className="text-xs text-gray-500">© 2026 DOKA</p>
+                    <p className="text-xs text-gray-500">© 2026 Clicksuq</p>
                   </div>
                 </div>
               </SheetContent>

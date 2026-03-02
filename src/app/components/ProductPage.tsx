@@ -19,6 +19,10 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [selectedImage, setSelectedImage] = useState(0);
 
+  // ✅ Dial number when "Contact to Buy" is clicked
+  const BUY_PHONE_NUMBER = '0913552133';
+  const telHref = `tel:${BUY_PHONE_NUMBER.replace(/\s+/g, '')}`;
+
   useEffect(() => {
     if (!product) return;
     fetchProducts({ categoryId: product.category })
@@ -36,14 +40,12 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
     );
   }
 
-  const discount = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0;
-
   // Normalize to array: support images[] or single image string from API
   const rawImages = product.images ?? [];
   const images: string[] = Array.isArray(rawImages)
-    ? (rawImages.length ? rawImages : ['https://placehold.co/600x600?text=Product'])
+    ? rawImages.length
+      ? rawImages
+      : ['https://placehold.co/600x600?text=Product']
     : [String(rawImages)];
   const mainImage = images[Math.min(selectedImage, images.length - 1)];
 
@@ -76,13 +78,10 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
               transition={{ duration: 0.2 }}
               className="aspect-square overflow-hidden bg-gray-100 rounded-lg"
             >
-              <img
-                src={mainImage}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
+              <img src={mainImage} alt={product.name} className="w-full h-full object-cover" />
             </motion.div>
-            {/* Thumbnail strip: always show when we have images so multiple images are supported */}
+
+            {/* Thumbnail strip */}
             <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-4 gap-2 sm:gap-3">
               {images.map((image, index) => (
                 <button
@@ -109,10 +108,14 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
           <div className="space-y-6">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <Badge variant="outline" className="text-xs">{product.brand}</Badge>
+                <Badge variant="outline" className="text-xs">
+                  {product.brand}
+                </Badge>
                 {product.trending && <Badge className="text-xs">Trending</Badge>}
                 {product.stock < 10 && product.stock > 0 && (
-                  <Badge variant="destructive" className="text-xs">Low Stock</Badge>
+                  <Badge variant="destructive" className="text-xs">
+                    Low Stock
+                  </Badge>
                 )}
               </div>
               <h1 className="mb-2 text-xl sm:text-2xl font-semibold">{product.name}</h1>
@@ -130,7 +133,11 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
                     Birr {product.originalPrice.toFixed(2)}
                   </span>
                   <span className="inline-flex items-center h-5 px-2 rounded bg-red-600 text-white text-[11px] font-semibold leading-none">
-                    -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                    -
+                    {Math.round(
+                      ((product.originalPrice - product.price) / product.originalPrice) * 100
+                    )}
+                    %
                   </span>
                 </>
               )}
@@ -157,11 +164,15 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
                 <Button
                   size="lg"
                   className="flex-1 h-12"
-                  onClick={() => window.location.href = `mailto:info@doka.com?subject=Inquiry: ${encodeURIComponent(product.name)}`}
+                  onClick={() => {
+                    // ✅ Open phone dialer with the number pre-filled
+                    window.location.href = telHref;
+                  }}
                 >
                   <Phone className="h-5 w-5 mr-2" />
                   Contact to Buy
                 </Button>
+
                 <Button variant="outline" size="icon" className="h-12 w-12">
                   <Heart className="h-5 w-5" />
                 </Button>
@@ -184,11 +195,12 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
           </div>
         </div>
 
-        {/* About this product - single section */}
+        {/* About this product */}
         <div className="mt-16 border-t border-gray-100 pt-10">
           <h3 className="text-lg font-semibold text-gray-900 mb-6">About this product</h3>
           <div className="space-y-6 text-gray-600">
             <p className="text-[15px] leading-relaxed">{product.description}</p>
+
             {product.features && product.features.length > 0 && (
               <ul className="space-y-2">
                 {product.features.map((feature, index) => (
@@ -199,12 +211,16 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
                 ))}
               </ul>
             )}
+
             {product.specs && Object.keys(product.specs).length > 0 && (
               <div className="pt-2">
                 <p className="text-sm font-medium text-gray-900 mb-3">Details</p>
                 <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
                   {Object.entries(product.specs).map(([key, value]) => (
-                    <div key={key} className="flex justify-between gap-4 py-2 border-b border-gray-100">
+                    <div
+                      key={key}
+                      className="flex justify-between gap-4 py-2 border-b border-gray-100"
+                    >
                       <dt className="font-medium text-gray-700">{key}</dt>
                       <dd className="text-gray-600">{value}</dd>
                     </div>
@@ -221,11 +237,7 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
             <h3 className="mb-6 text-lg font-semibold">You Might Also Like</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {relatedProducts.map((relatedProduct) => (
-                <ProductCard
-                  key={relatedProduct.id}
-                  product={relatedProduct}
-                  onNavigate={onNavigate}
-                />
+                <ProductCard key={relatedProduct.id} product={relatedProduct} onNavigate={onNavigate} />
               ))}
             </div>
           </div>

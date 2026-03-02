@@ -1,47 +1,72 @@
 import { useState, useMemo } from 'react';
-import { ArrowRight, TrendingUp, SlidersHorizontal } from 'lucide-react';
+import { ArrowRight, TrendingUp, SlidersHorizontal, Shield } from 'lucide-react';
+import { motion } from 'motion/react';
+
 import { HeroCarousel } from './HeroCarousel';
 import { ProductCard } from './ProductCard';
-import { heroSlides } from '../../data/mockData';
-import { motion } from 'motion/react';
-import { useCategories, useProducts, useHero } from '../../hooks/useApi';
 import { LoadingState } from './LoadingState';
+
+import { heroSlides as heroSlidesMock } from '../../data/mockData';
+import { useCategories, useProducts, useHero } from '../../hooks/useApi';
+import { useAuth } from '../../context/AuthContext';
+
 import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
 import { Slider } from './ui/slider';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
 import { Separator } from './ui/separator';
 
-const PRICE_MAX = 3000;
+// const PRICE_MAX = 3000;
 
 interface HomePageProps {
   onNavigate: (page: string, productId?: string) => void;
 }
 
 export function HomePage({ onNavigate }: HomePageProps) {
+  const { isAdmin } = useAuth();
+
   const { categories, loading: catLoading, error: catError } = useCategories();
   const { products, loading: prodLoading, error: prodError } = useProducts();
   const { slides: heroSlidesFromApi } = useHero();
+  const PRICE_MAX = useMemo(() => {
+    const max = Math.max(0, ...products.map((p) => Number(p.price) || 0));
+    return Math.max(3000, Math.ceil(max / 50) * 50); // at least 3000, rounded
+  }, [products]);
+
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, PRICE_MAX]);
   const [sortBy, setSortBy] = useState<string>('featured');
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const brands = useMemo(() => Array.from(new Set(products.map((p) => p.brand))).sort(), [products]);
-  const trendingProducts = products.filter((p) => p.trending);
-  const featuredProducts = products.filter((p) => p.featured);
+  const loading = catLoading || prodLoading;
+  const error = catError || prodError;
 
+  const brands = useMemo(
+    () => Array.from(new Set(products.map((p) => p.brand))).sort(),
+    [products]
+  );
+
+  const trendingProducts = useMemo(() => products.filter((p) => p.trending), [products]);
+  const featuredProducts = useMemo(() => products.filter((p) => p.featured), [products]);
+
+  const hasActiveFilters =
+    selectedCategories.length > 0 ||
+    selectedBrands.length > 0 ||
+    priceRange[0] !== 0 ||
+    priceRange[1] !== PRICE_MAX;
+useMemo(() => {
+    setPriceRange((prev) => [Math.min(prev[0], PRICE_MAX), PRICE_MAX]);
+  }, [PRICE_MAX]);
   const filteredProducts = useMemo(() => {
     let filtered = products.filter((product) => {
       const categoryMatch =
         selectedCategories.length === 0 || selectedCategories.includes(product.category);
-      const brandMatch =
-        selectedBrands.length === 0 || selectedBrands.includes(product.brand);
-      const priceMatch =
-        product.price >= priceRange[0] && product.price <= priceRange[1];
+      const brandMatch = selectedBrands.length === 0 || selectedBrands.includes(product.brand);
+      const priceMatch = product.price >= priceRange[0] && product.price <= priceRange[1];
       return categoryMatch && brandMatch && priceMatch;
     });
+
     switch (sortBy) {
       case 'price-low':
         filtered.sort((a, b) => a.price - b.price);
@@ -56,6 +81,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
         filtered.sort((a, b) => a.name.localeCompare(b.name));
         break;
       default:
+        // featured/trending first
         filtered.sort((a, b) => {
           if (a.featured && !b.featured) return -1;
           if (!a.featured && b.featured) return 1;
@@ -63,7 +89,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
           if (!a.trending && b.trending) return 1;
           return 0;
         });
+        break;
     }
+
     return filtered;
   }, [products, selectedCategories, selectedBrands, priceRange, sortBy]);
 
@@ -72,36 +100,47 @@ export function HomePage({ onNavigate }: HomePageProps) {
       checked ? [...prev, categoryId] : prev.filter((c) => c !== categoryId)
     );
   };
+
   const onBrandChange = (brand: string, checked: boolean) => {
     setSelectedBrands((prev) =>
       checked ? [...prev, brand] : prev.filter((b) => b !== brand)
     );
   };
+
   const clearFilters = () => {
     setSelectedCategories([]);
     setSelectedBrands([]);
     setPriceRange([0, PRICE_MAX]);
   };
-  const hasActiveFilters =
-    selectedCategories.length > 0 ||
-    selectedBrands.length > 0 ||
-    priceRange[0] !== 0 ||
-    priceRange[1] !== PRICE_MAX;
 
-  const loading = catLoading || prodLoading;
-  const error = catError || prodError;
-  const heroSlidesToShow = heroSlidesFromApi.length > 0
-    ? heroSlidesFromApi.map((s) => ({ image: s.image, title: s.title, subtitle: s.subtitle, cta: s.cta, link: s.link }))
-    : heroSlides.map((s) => ({ image: s.image, title: s.title, subtitle: s.subtitle, cta: s.cta, link: s.link }));
+  const heroSlidesToShow =
+    heroSlidesFromApi.length > 0
+      ? heroSlidesFromApi.map((s) => ({
+          image: s.image,
+          title: s.title,
+          subtitle: s.subtitle,
+          cta: s.cta,
+          link: s.link,
+        }))
+      : heroSlidesMock.map((s) => ({
+          image: s.image,
+          title: s.title,
+          subtitle: s.subtitle,
+          cta: s.cta,
+          link: s.link,
+        }));
 
   if (loading) return <LoadingState />;
+
   if (error) {
     return (
       <div className="min-h-screen bg-white">
         <section className="max-w-[1400px] mx-auto px-4 py-8">
           <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
             <p className="font-medium text-red-800">Could not load products.</p>
-            <p className="mt-1 text-sm text-red-600">Make sure the backend is running at http://localhost:3001</p>
+            <p className="mt-1 text-sm text-red-600">
+              Make sure the backend is running and VITE_API_URL is set correctly.
+            </p>
             <p className="mt-2 text-xs text-gray-600">Error: {error}</p>
           </div>
         </section>
@@ -111,6 +150,22 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Top actions (optional) */}
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 pt-3">
+        <div className="flex items-center justify-end gap-2">
+          {isAdmin && (
+            <Button
+              variant="outline"
+              className="h-9 text-sm gap-2"
+              onClick={() => onNavigate('admin')}
+            >
+              <Shield className="h-4 w-4" />
+              Admin
+            </Button>
+          )}
+        </div>
+      </div>
+
       {/* Hero Section */}
       <section className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
         <HeroCarousel slides={heroSlidesToShow} onNavigate={onNavigate} />
@@ -120,7 +175,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
       <section className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 py-10 sm:py-14">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <span className="text-xs font-medium tracking-widest uppercase text-gray-400">Browse</span>
+            <span className="text-xs font-medium tracking-widest uppercase text-gray-400">
+              Browse
+            </span>
             <h2 className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-gray-900">
               Shop by Category
             </h2>
@@ -128,6 +185,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
               Explore our wide range of premium products
             </p>
           </div>
+
           <button
             onClick={() => onNavigate('categories')}
             className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors group shrink-0"
@@ -154,7 +212,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <h3 className="font-semibold text-sm mb-0.5 group-hover:text-gray-600 transition-colors">{category.name}</h3>
+              <h3 className="font-semibold text-sm mb-0.5 group-hover:text-gray-600 transition-colors">
+                {category.name}
+              </h3>
             </motion.button>
           ))}
         </div>
@@ -164,7 +224,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
       <section className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 py-10 sm:py-14">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <span className="text-xs font-medium tracking-widest uppercase text-gray-400">Shop</span>
+            <span className="text-xs font-medium tracking-widest uppercase text-gray-400">
+              Shop
+            </span>
 
             <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-gray-900">
@@ -259,14 +321,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                   <div>
                     <h4 className="font-semibold mb-3 text-xs">Price range</h4>
                     <div className="space-y-3">
-                      <Slider
-                        min={0}
-                        max={PRICE_MAX}
-                        step={50}
-                        value={priceRange}
-                        onValueChange={(v) => setPriceRange(v as [number, number])}
-                        className="w-full"
-                      />
+                      <Slider min={0} max={PRICE_MAX} step={50} value={priceRange} onValueChange={(value) => setPriceRange(value as [number, number])} />
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-medium">Birr {priceRange[0]}</span>
                         <span className="font-medium">Birr {priceRange[1]}</span>
@@ -306,17 +361,18 @@ export function HomePage({ onNavigate }: HomePageProps) {
       <section className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 py-10 sm:py-14">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <span className="text-xs font-medium tracking-widest uppercase text-gray-400">This week</span>
+            <span className="text-xs font-medium tracking-widest uppercase text-gray-400">
+              This week
+            </span>
             <h2 className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-gray-900 flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-white">
                 <TrendingUp className="h-4 w-4" />
               </span>
               Trending Now
             </h2>
-            <p className="mt-1.5 text-sm text-gray-500">
-              Most popular products right now
-            </p>
+            <p className="mt-1.5 text-sm text-gray-500">Most popular products right now</p>
           </div>
+
           <button
             onClick={() => onNavigate('products')}
             className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-black transition-colors group"
@@ -327,17 +383,21 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
-          {trendingProducts.length > 0 ? trendingProducts.slice(0, 6).map((product, index) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05, duration: 0.3 }}
-            >
-              <ProductCard product={product} onNavigate={onNavigate} />
-            </motion.div>
-          )) : (
-            <p className="col-span-full text-center text-gray-500 py-8">No trending products right now.</p>
+          {trendingProducts.length > 0 ? (
+            trendingProducts.slice(0, 6).map((product, index) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05, duration: 0.3 }}
+              >
+                <ProductCard product={product} onNavigate={onNavigate} />
+              </motion.div>
+            ))
+          ) : (
+            <p className="col-span-full text-center text-gray-500 py-8">
+              No trending products right now.
+            </p>
           )}
         </div>
       </section>
@@ -347,12 +407,15 @@ export function HomePage({ onNavigate }: HomePageProps) {
         <section className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 py-10 sm:py-14">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
             <div>
-              <span className="text-xs font-medium tracking-widest uppercase text-gray-400">Curated</span>
+              <span className="text-xs font-medium tracking-widest uppercase text-gray-400">
+                Curated
+              </span>
               <h2 className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-gray-900">
                 Featured
               </h2>
               <p className="mt-1.5 text-sm text-gray-500">Hand-picked favorites for you</p>
             </div>
+
             <button
               onClick={() => onNavigate('products')}
               className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors group shrink-0"
@@ -361,6 +424,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </button>
           </div>
+
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
             {featuredProducts.slice(0, 6).map((product, index) => (
               <motion.div

@@ -14,7 +14,7 @@ export function Footer({ onOpenContent, onNavigate }: FooterProps) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <h3 className="font-semibold text-base sm:text-lg mb-2 sm:mb-4 text-white">DOKA</h3>
+            <h3 className="font-semibold text-base sm:text-lg mb-2 sm:mb-4 text-white">ClickSuq</h3>
             <p className="text-white/70 text-xs sm:text-sm">
               Premium technology and lifestyle products for the modern world.
             </p>
@@ -66,11 +66,11 @@ export function Footer({ onOpenContent, onNavigate }: FooterProps) {
                   FAQ
                 </button>
               </li>
-              <li>
+              {/* <li>
                 <button type="button" onClick={() => onOpenContent('warranty')} className="text-white/70 hover:text-white transition-colors text-left">
                   Warranty
                 </button>
-              </li>
+              </li> */}
             </ul>
           </div>
 
@@ -106,7 +106,7 @@ export function Footer({ onOpenContent, onNavigate }: FooterProps) {
         <div className="border-t border-white/10 pt-4 sm:pt-8 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
           <div className="flex flex-col items-center md:items-start gap-2 sm:gap-3">
             <p className="text-xs sm:text-sm text-white/70">
-              © {currentYear} DOKA. All rights reserved.
+              © {currentYear} ClickSuq. All rights reserved.
             </p>
             <button
               type="button"
@@ -115,12 +115,21 @@ export function Footer({ onOpenContent, onNavigate }: FooterProps) {
             >
               Site management
             </button>
-            <div className="flex items-center gap-2">
-              <div className="h-5 sm:h-6 w-5 sm:w-6 bg-white/10 rounded flex items-center justify-center">
-                <span className="text-white text-[8px] sm:text-[10px] font-bold">LS</span>
-              </div>
-              <span className="text-xs sm:text-sm text-white/70">Made by Loom Solutions</span>
-            </div>
+            <a
+  href="https://loomsolutions.net/"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="flex items-center gap-2 group"
+>
+  <div className="h-5 sm:h-6 w-5 sm:w-6 bg-white/10 rounded flex items-center justify-center group-hover:bg-white/20 transition-colors">
+    <span className="text-white text-[8px] sm:text-[10px] font-bold">
+      LS
+    </span>
+  </div>
+  <span className="text-xs sm:text-sm text-white/70 group-hover:text-white transition-colors">
+    Made by Loom Solutions
+  </span>
+</a>
           </div>
           <div className="flex items-center gap-4 sm:gap-6">
             <a
