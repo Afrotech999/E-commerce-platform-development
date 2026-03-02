@@ -7,7 +7,10 @@
     "dev": "vite",
     "dev:api": "cd backend && npm run dev",
     "dev:all": "concurrently \"npm run dev\" \"npm run dev:api\"",
-    "build": "vite build",
+    // use npx to invoke the local vite binary instead of executing the file directly
+    // this avoids &#34;permission denied&#34; errors in environments where the
+    // executable bit isn&#39;t set (e.g. Vercel clones from Windows commits).
+    "build": "npx vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -30,5 +33,6 @@
     "tailwindcss": "^4.0.0",
     "typescript": "~5.6.2",
     "vite": "^6.0.3"
-  }
+  },
+  "postinstall": "chmod +x node_modules/.bin/vite || true"
 }
