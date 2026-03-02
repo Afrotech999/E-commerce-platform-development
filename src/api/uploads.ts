@@ -6,19 +6,14 @@ function getToken(): string | null {
 }
 
 /**
- * Upload a single file (multipart) and return its public URL
- * Backend:
- *   POST  /api/uploads   (admin)
- *   GET   /uploads/*     (public static)
- *
- * Your API_BASE includes "/api", so:
- *   API_BASE = http://localhost:3001/api
- *   Upload endpoint = http://localhost:3001/api/uploads
- *   Public file base = http://localhost:3001/uploads/...
+ * Upload a single file and return its public URL.
+ * Backend returns: { status: true, urls: string[] }
  */
 export async function uploadFile(file: File): Promise<string> {
   const fd = new FormData();
-  fd.append('file', file);
+
+  // ✅ MUST match Laravel: $request->file('files')
+  fd.append('files', file);
 
   // API_BASE ends with "/api"
   const origin = API_BASE.replace(/\/api\/?$/, '');
@@ -38,30 +33,28 @@ export async function uploadFile(file: File): Promise<string> {
 
   const json: any = await res.json().catch(() => ({}));
 
-  // accept multiple backend response shapes
-  const urlOrPath =
-    json?.url ??
-    json?.data?.url ??
-    json?.path ??
+  // ✅ Your Laravel controller returns `urls`
+  const url =
+    (Array.isArray(json?.urls) && json.urls[0]) ||
+    json?.url ||
+    json?.data?.url ||
+    json?.path ||
     json?.data?.path;
 
-  if (!urlOrPath || typeof urlOrPath !== 'string') {
+  if (!url || typeof url !== 'string') {
     throw new Error('Upload failed: server did not return url/path');
   }
 
-  // if backend returns "/uploads/xxx.jpg"
-  if (urlOrPath.startsWith('/')) return `${origin}${urlOrPath}`;
+  // If backend returns "/storage/uploads/xxx.jpg"
+  if (url.startsWith('/')) return `${origin}${url}`;
 
-  // if backend returns "uploads/xxx.jpg"
-  if (!/^https?:\/\//i.test(urlOrPath) && urlOrPath.startsWith('uploads/')) {
-    return `${origin}/${urlOrPath}`;
+  // If backend returns "storage/uploads/xxx.jpg"
+  if (!/^https?:\/\//i.test(url) && url.startsWith('storage/')) {
+    return `${origin}/${url}`;
   }
 
-  return urlOrPath;
+  return url;
 }
 
-/**
- * ✅ Alias for older components that import `uploadImage`
- * (HeroAdmin.tsx is importing uploadImage)
- */
+/** ✅ Alias for older components */
 export const uploadImage = uploadFile;
