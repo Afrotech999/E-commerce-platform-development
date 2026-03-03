@@ -129,8 +129,10 @@ const [categoryDialogForm, setCategoryDialogForm] = useState({
     { title: 'Total Products', value: products.length, icon: Package, color: 'bg-blue-500' },
     {
       title: 'Total Revenue',
-      value: `Birr ${products.reduce((sum, p) => sum + p.price * 10, 0).toLocaleString()}`,
-      icon: DollarSign,
+value: `Birr ${products
+  .reduce((sum, p) => sum + Number(p.price || 0) * 10, 0)
+  .toLocaleString()}`,
+        icon: DollarSign,
       color: 'bg-green-500',
     },
     { title: 'Trending Items', value: products.filter((p) => p.trending).length, icon: TrendingUp, color: 'bg-purple-500' },
@@ -519,7 +521,7 @@ const handleDeleteCategoryDialog = async (slug: string) => {
                           </TableCell>
                           <TableCell className="capitalize">{product.category}</TableCell>
                           <TableCell>{product.brand}</TableCell>
-                          <TableCell>Birr {product.price.toFixed(2)}</TableCell>
+<TableCell>Birr {Number(product.price || 0).toFixed(2)}</TableCell>
                           <TableCell>{product.stock}</TableCell>
                           <TableCell>
                             <div className="flex gap-2">

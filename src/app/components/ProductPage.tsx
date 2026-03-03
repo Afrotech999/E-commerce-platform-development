@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Star, Phone, Heart, Share2, Check, Truck } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -23,14 +23,26 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
   const BUY_PHONE_NUMBER = '0913552133';
   const telHref = `tel:${BUY_PHONE_NUMBER.replace(/\s+/g, '')}`;
 
+  // ✅ Normalize numeric fields (because backend may return strings)
+  const price = useMemo(() => Number((product as any)?.price ?? 0), [product]);
+  const originalPrice = useMemo(() => {
+    const v = (product as any)?.originalPrice;
+    return v == null || v === '' ? null : Number(v);
+  }, [product]);
+  const stock = useMemo(() => Number((product as any)?.stock ?? 0), [product]);
+
   useEffect(() => {
     if (!product) return;
+
     fetchProducts({ categoryId: product.category })
-      .then((list) => setRelatedProducts(list.filter((p) => p.id !== product.id).slice(0, 4)))
+      .then((list) =>
+        setRelatedProducts(list.filter((p) => p.id !== product.id).slice(0, 4))
+      )
       .catch(() => setRelatedProducts([]));
   }, [product?.id, product?.category]);
 
   if (loading && !product) return <LoadingState />;
+
   if (error || !product) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
@@ -40,14 +52,21 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
     );
   }
 
-  // Normalize to array: support images[] or single image string from API
+  // Normalize images to array: support images[] or single image string from API
   const rawImages = product.images ?? [];
   const images: string[] = Array.isArray(rawImages)
     ? rawImages.length
       ? rawImages
       : ['https://placehold.co/600x600?text=Product']
     : [String(rawImages)];
+
   const mainImage = images[Math.min(selectedImage, images.length - 1)];
+
+  // Discount percent (safe)
+  const discountPercent =
+    originalPrice != null && originalPrice > 0
+      ? Math.round(((originalPrice - price) / originalPrice) * 100)
+      : 0;
 
   return (
     <div className="min-h-screen bg-white">
@@ -69,7 +88,7 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
       {/* Product Details */}
       <div className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Images: main image + thumbnail strip for multiple images */}
+          {/* Images */}
           <div className="space-y-4">
             <motion.div
               key={selectedImage}
@@ -81,7 +100,7 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
               <img src={mainImage} alt={product.name} className="w-full h-full object-cover" />
             </motion.div>
 
-            {/* Thumbnail strip */}
+            {/* Thumbnails */}
             <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-4 gap-2 sm:gap-3">
               {images.map((image, index) => (
                 <button
@@ -112,33 +131,36 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
                   {product.brand}
                 </Badge>
                 {product.trending && <Badge className="text-xs">Trending</Badge>}
-                {product.stock < 10 && product.stock > 0 && (
+                {stock < 10 && stock > 0 && (
                   <Badge variant="destructive" className="text-xs">
                     Low Stock
                   </Badge>
                 )}
               </div>
+
               <h1 className="mb-2 text-xl sm:text-2xl font-semibold">{product.name}</h1>
+
               <div className="flex items-center gap-1 mb-4">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                 <span className="font-semibold">{product.rating}</span>
               </div>
             </div>
 
+            {/* Price */}
             <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="text-2xl sm:text-3xl font-bold">Birr {product.price.toFixed(2)}</span>
-              {product.originalPrice && (
+              <span className="text-2xl sm:text-3xl font-bold">Birr {price.toFixed(2)}</span>
+
+              {originalPrice != null && originalPrice > 0 && (
                 <>
                   <span className="text-lg text-gray-400 line-through">
-                    Birr {product.originalPrice.toFixed(2)}
+                    Birr {originalPrice.toFixed(2)}
                   </span>
-                  <span className="inline-flex items-center h-5 px-2 rounded bg-red-600 text-white text-[11px] font-semibold leading-none">
-                    -
-                    {Math.round(
-                      ((product.originalPrice - product.price) / product.originalPrice) * 100
-                    )}
-                    %
-                  </span>
+
+                  {discountPercent > 0 && (
+                    <span className="inline-flex items-center h-5 px-2 rounded bg-red-600 text-white text-[11px] font-semibold leading-none">
+                      -{discountPercent}%
+                    </span>
+                  )}
                 </>
               )}
             </div>
@@ -147,11 +169,11 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
 
             {/* Stock Status */}
             <div className="flex items-center gap-2">
-              {product.stock > 0 ? (
+              {stock > 0 ? (
                 <>
                   <Check className="h-4 w-4 text-green-600" />
                   <span className="text-green-600 font-medium text-sm">In Stock</span>
-                  <span className="text-gray-600 text-sm">({product.stock} available)</span>
+                  <span className="text-gray-600 text-sm">({stock} available)</span>
                 </>
               ) : (
                 <span className="text-red-600 font-medium text-sm">Out of Stock</span>
@@ -159,13 +181,12 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
             </div>
 
             {/* Call to Action */}
-            {product.stock > 0 && (
+            {stock > 0 && (
               <div className="flex gap-3">
                 <Button
                   size="lg"
                   className="flex-1 h-12"
                   onClick={() => {
-                    // ✅ Open phone dialer with the number pre-filled
                     window.location.href = telHref;
                   }}
                 >
@@ -217,12 +238,9 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
                 <p className="text-sm font-medium text-gray-900 mb-3">Details</p>
                 <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
                   {Object.entries(product.specs).map(([key, value]) => (
-                    <div
-                      key={key}
-                      className="flex justify-between gap-4 py-2 border-b border-gray-100"
-                    >
+                    <div key={key} className="flex justify-between gap-4 py-2 border-b border-gray-100">
                       <dt className="font-medium text-gray-700">{key}</dt>
-                      <dd className="text-gray-600">{value}</dd>
+                      <dd className="text-gray-600">{String(value)}</dd>
                     </div>
                   ))}
                 </dl>
@@ -237,7 +255,11 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
             <h3 className="mb-6 text-lg font-semibold">You Might Also Like</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {relatedProducts.map((relatedProduct) => (
-                <ProductCard key={relatedProduct.id} product={relatedProduct} onNavigate={onNavigate} />
+                <ProductCard
+                  key={relatedProduct.id}
+                  product={relatedProduct}
+                  onNavigate={onNavigate}
+                />
               ))}
             </div>
           </div>

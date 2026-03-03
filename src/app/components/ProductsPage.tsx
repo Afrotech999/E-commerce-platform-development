@@ -1,8 +1,7 @@
 import { useState, useMemo } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import { ProductCard } from './ProductCard';
-import { useCategories } from '../../hooks/useApi';
-import { useProducts } from '../../hooks/useApi';
+import { useCategories, useProducts } from '../../hooks/useApi';
 import { LoadingState } from './LoadingState';
 import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
@@ -18,15 +17,18 @@ interface ProductsPageProps {
 export function ProductsPage({ categoryId, onNavigate }: ProductsPageProps) {
   const isTrending = categoryId === 'trending';
   const isNew = categoryId === 'new';
+
   const effectiveCategoryId =
     categoryId && categoryId !== 'trending' && categoryId !== 'new'
       ? categoryId
       : undefined;
+
   const { categories, loading: catLoading, error: catError } = useCategories();
   const { products, loading: prodLoading, error: prodError } = useProducts({
     categoryId: effectiveCategoryId,
     trending: isTrending ? true : undefined,
   });
+
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     effectiveCategoryId ? [effectiveCategoryId] : []
   );
@@ -37,17 +39,21 @@ export function ProductsPage({ categoryId, onNavigate }: ProductsPageProps) {
 
   const loading = catLoading || prodLoading;
   const error = catError || prodError;
+
   const brands = Array.from(new Set(products.map((p) => p.brand))).sort();
 
   const filteredProducts = useMemo(() => {
+    // Work on a copy
     let filtered = products.filter((product) => {
       const categoryMatch =
         selectedCategories.length === 0 ||
         selectedCategories.includes(product.category);
+
       const brandMatch =
         selectedBrands.length === 0 || selectedBrands.includes(product.brand);
-      const priceMatch =
-        product.price >= priceRange[0] && product.price <= priceRange[1];
+
+      const price = Number((product as any).price ?? 0);
+      const priceMatch = price >= priceRange[0] && price <= priceRange[1];
 
       return categoryMatch && brandMatch && priceMatch;
     });
@@ -55,13 +61,17 @@ export function ProductsPage({ categoryId, onNavigate }: ProductsPageProps) {
     // Sort
     switch (sortBy) {
       case 'price-low':
-        filtered.sort((a, b) => a.price - b.price);
+        filtered.sort(
+          (a, b) => Number((a as any).price ?? 0) - Number((b as any).price ?? 0)
+        );
         break;
       case 'price-high':
-        filtered.sort((a, b) => b.price - a.price);
+        filtered.sort(
+          (a, b) => Number((b as any).price ?? 0) - Number((a as any).price ?? 0)
+        );
         break;
       case 'rating':
-        filtered.sort((a, b) => b.rating - a.rating);
+        filtered.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
         break;
       case 'name':
         filtered.sort((a, b) => a.name.localeCompare(b.name));
@@ -80,16 +90,12 @@ export function ProductsPage({ categoryId, onNavigate }: ProductsPageProps) {
     return filtered;
   }, [products, selectedCategories, selectedBrands, priceRange, sortBy]);
 
-  const onCategoryChange = (categoryId: string, checked: boolean) => {
-    setSelectedCategories((prev) =>
-      checked ? [...prev, categoryId] : prev.filter((c) => c !== categoryId)
-    );
+  const onCategoryChange = (id: string, checked: boolean) => {
+    setSelectedCategories((prev) => (checked ? [...prev, id] : prev.filter((c) => c !== id)));
   };
 
   const onBrandChange = (brand: string, checked: boolean) => {
-    setSelectedBrands((prev) =>
-      checked ? [...prev, brand] : prev.filter((b) => b !== brand)
-    );
+    setSelectedBrands((prev) => (checked ? [...prev, brand] : prev.filter((b) => b !== brand)));
   };
 
   const clearFilters = () => {
@@ -111,13 +117,10 @@ export function ProductsPage({ categoryId, onNavigate }: ProductsPageProps) {
         <h4 className="font-semibold mb-3 text-xs">Categories</h4>
         <div className="space-y-2.5">
           {categories.map((category) => (
-            <label
-              key={category.id}
-              className="flex items-center gap-2 cursor-pointer"
-            >
+            <label key={category.id} className="flex items-center gap-2 cursor-pointer">
               <Checkbox
                 checked={selectedCategories.includes(category.id)}
-                onCheckedChange={(checked) => onCategoryChange(category.id, checked)}
+                onCheckedChange={(checked) => onCategoryChange(category.id, Boolean(checked))}
               />
               <span className="text-xs font-medium">
                 {category.name} ({category.productCount})
@@ -134,13 +137,10 @@ export function ProductsPage({ categoryId, onNavigate }: ProductsPageProps) {
         <h4 className="font-semibold mb-3 text-xs">Brands</h4>
         <div className="space-y-2.5">
           {brands.map((brand) => (
-            <label
-              key={brand}
-              className="flex items-center gap-2 cursor-pointer"
-            >
+            <label key={brand} className="flex items-center gap-2 cursor-pointer">
               <Checkbox
                 checked={selectedBrands.includes(brand)}
-                onCheckedChange={(checked) => onBrandChange(brand, checked)}
+                onCheckedChange={(checked) => onBrandChange(brand, Boolean(checked))}
               />
               <span className="text-xs font-medium">{brand}</span>
             </label>
@@ -183,6 +183,7 @@ export function ProductsPage({ categoryId, onNavigate }: ProductsPageProps) {
   );
 
   if (loading) return <LoadingState />;
+
   if (error) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center p-4">
@@ -263,16 +264,14 @@ export function ProductsPage({ categoryId, onNavigate }: ProductsPageProps) {
                 <p className="text-gray-600 mb-4 text-xs">
                   Try adjusting your filters to see more results
                 </p>
-                <Button onClick={clearFilters} className="h-8 text-xs">Clear Filters</Button>
+                <Button onClick={clearFilters} className="h-8 text-xs">
+                  Clear Filters
+                </Button>
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                 {filteredProducts.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    onNavigate={onNavigate}
-                  />
+                  <ProductCard key={product.id} product={product} onNavigate={onNavigate} />
                 ))}
               </div>
             )}
