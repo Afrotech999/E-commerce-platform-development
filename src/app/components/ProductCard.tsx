@@ -72,10 +72,10 @@ export function ProductCard({ product, onNavigate }: ProductCardProps) {
         <p className="text-xs text-gray-500 line-clamp-1">{product.brand}</p>
 
         <div className="flex items-center gap-1.5">
-          <span className="font-semibold text-sm">Birr {product.price.toFixed(2)}</span>
+          <span className="font-semibold text-sm">Birr {Number(product.price).toFixed(2)}</span>
           {product.originalPrice && (
             <span className="text-xs text-gray-400 line-through">
-              Birr {product.originalPrice.toFixed(2)}
+              Birr {Number(product.originalPrice).toFixed(2)}
             </span>
           )}
         </div>
