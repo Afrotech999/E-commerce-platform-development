@@ -11,11 +11,13 @@ export type HeroSlide = {
 };
 
 export async function fetchHeroSlides(): Promise<HeroSlide[]> {
-  const res = await apiGet<{ slides: HeroSlide[] }>('/hero', false);
-  return Array.isArray(res?.slides) ? res.slides : [];
+  // backend returns HeroSlide[]
+  const res = await apiGet<HeroSlide[]>('/hero', false);
+  return Array.isArray(res) ? res : [];
 }
 
 export async function updateHeroSlides(slides: HeroSlide[]): Promise<HeroSlide[]> {
-  const res = await apiPut<{ slides: HeroSlide[] }>('/hero', { slides });
-  return Array.isArray(res?.slides) ? res.slides : [];
+  // if your backend PUT returns HeroSlide[] (recommended)
+  const res = await apiPut<HeroSlide[]>('/hero', { slides });
+  return Array.isArray(res) ? res : [];
 }
