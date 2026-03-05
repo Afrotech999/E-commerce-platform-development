@@ -89,11 +89,6 @@ export function AdminPage({ onNavigate }: AdminPageProps) {
     image: '',
   });
 
-  // Category form (legacy handlers kept)
-  const [categoryForm, setCategoryForm] = useState({ slug: '', name: '', image: '' });
-  const [editingCategorySlug, setEditingCategorySlug] = useState<string | null>(null);
-  const [savingCategory, setSavingCategory] = useState(false);
-
   const stats = [
     { title: 'Total Products', value: products.length, icon: Package, color: 'bg-blue-500' },
     {
@@ -168,8 +163,8 @@ export function AdminPage({ onNavigate }: AdminPageProps) {
         specs:
           product.specs && Object.keys(product.specs).length > 0
             ? Object.entries(product.specs)
-                .map(([k, v]) => `${k}: ${v}`)
-                .join('\n')
+              .map(([k, v]) => `${k}: ${v}`)
+              .join('\n')
             : '',
         trending: Boolean(product.trending),
         featured: Boolean(product.featured),
@@ -374,30 +369,73 @@ export function AdminPage({ onNavigate }: AdminPageProps) {
     };
 
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-4">
-        <Card className="w-full max-w-sm border border-gray-100">
-          <CardHeader>
-            <CardTitle>Site management</CardTitle>
-            <p className="text-sm text-gray-500 mt-1">Log in to manage products, hero carousel, and categories.</p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label>Email</Label>
-              <Input type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} placeholder="admin@doka.com" />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col">
+          {/* Header section with brand color/style */}
+          <div className="bg-black p-10 text-center text-white relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+              <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-white blur-3xl"></div>
+              <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-white blur-3xl"></div>
             </div>
-            <div>
-              <Label>Password</Label>
-              <Input type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="••••••••" />
+
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="h-14 w-14 bg-white/10 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-sm border border-white/20">
+                <Package className="h-8 w-8 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold tracking-tight">Admin Portal</h1>
+              <p className="mt-2 text-sm text-gray-400">Secure access to Clicksuq management</p>
             </div>
-            <Button className="w-full" onClick={handleLogin}>
-              Log in
-            </Button>
-            <p className="text-xs text-gray-400">Default after seed: admin@doka.com / admin123</p>
-            <Button variant="ghost" className="w-full" onClick={() => onNavigate('home')}>
-              Back to Store
-            </Button>
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* Form section */}
+          <div className="p-10 space-y-8">
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-gray-700 ml-1">Email</Label>
+                <Input
+                  type="email"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  placeholder="admin@gmail.com"
+                  className="h-12 border-gray-200 focus:border-black focus:ring-black rounded-xl transition-all"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-gray-700 ml-1">Password</Label>
+                <Input
+                  type="password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="h-12 border-gray-200 focus:border-black focus:ring-black rounded-xl transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-2">
+              <Button
+                className="w-full h-12 bg-black hover:bg-black/90 text-white font-bold rounded-xl transition-all shadow-lg active:scale-[0.98] text-base"
+                onClick={handleLogin}
+              >
+                Log in to Dashboard
+              </Button>
+
+              <div className="flex items-center justify-center gap-4">
+                <div className="h-px flex-1 bg-gray-100"></div>
+                <span className="text-xs text-gray-400 uppercase tracking-widest font-medium">or</span>
+                <div className="h-px flex-1 bg-gray-100"></div>
+              </div>
+
+              <Button
+                variant="ghost"
+                className="w-full h-11 text-gray-500 hover:text-black hover:bg-gray-100/50 rounded-xl transition-all text-sm font-medium"
+                onClick={() => onNavigate('home')}
+              >
+                Return to Storefront
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -872,22 +910,20 @@ export function AdminPage({ onNavigate }: AdminPageProps) {
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, condition: 'new' })}
-                      className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold border-2 transition-all ${
-                        formData.condition !== 'used'
-                          ? 'border-blue-600 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
-                      }`}
+                      className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold border-2 transition-all ${formData.condition !== 'used'
+                        ? 'border-blue-600 bg-blue-50 text-blue-700'
+                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                        }`}
                     >
                       ✨ New Product
                     </button>
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, condition: 'used' })}
-                      className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold border-2 transition-all ${
-                        formData.condition === 'used'
-                          ? 'border-amber-500 bg-amber-50 text-amber-700'
-                          : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
-                      }`}
+                      className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold border-2 transition-all ${formData.condition === 'used'
+                        ? 'border-amber-500 bg-amber-50 text-amber-700'
+                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                        }`}
                     >
                       ♻️ Used Product
                     </button>

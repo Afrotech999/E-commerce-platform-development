@@ -44,6 +44,8 @@ export function ProductsPage({ categoryId, onNavigate }: ProductsPageProps) {
   const [hasChangedPrice, setHasChangedPrice] = useState(false);
   const [sortBy, setSortBy] = useState<string>('featured');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [showMoreCategories, setShowMoreCategories] = useState(false);
+  const [showMoreBrands, setShowMoreBrands] = useState(false);
 
   const loading = catLoading || prodLoading;
   const error = catError || prodError;
@@ -131,7 +133,7 @@ export function ProductsPage({ categoryId, onNavigate }: ProductsPageProps) {
       <div>
         <h4 className="font-semibold mb-3 text-xs">Categories</h4>
         <div className="space-y-2.5">
-          {categories.map((category) => (
+          {(showMoreCategories ? categories : categories.slice(0, 5)).map((category) => (
             <label key={category.id} className="flex items-center gap-2 cursor-pointer">
               <Checkbox
                 checked={selectedCategories.includes(category.id)}
@@ -142,6 +144,14 @@ export function ProductsPage({ categoryId, onNavigate }: ProductsPageProps) {
               </span>
             </label>
           ))}
+          {categories.length > 5 && (
+            <button
+              onClick={() => setShowMoreCategories(!showMoreCategories)}
+              className="text-xs text-black font-semibold mt-2 hover:underline text-left w-full"
+            >
+              {showMoreCategories ? 'See Less' : 'See More'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -150,7 +160,7 @@ export function ProductsPage({ categoryId, onNavigate }: ProductsPageProps) {
       <div>
         <h4 className="font-semibold mb-3 text-xs">Brands</h4>
         <div className="space-y-2.5">
-          {brands.map((brand) => (
+          {(showMoreBrands ? brands : brands.slice(0, 5)).map((brand) => (
             <label key={brand} className="flex items-center gap-2 cursor-pointer">
               <Checkbox
                 checked={selectedBrands.includes(brand)}
@@ -159,6 +169,14 @@ export function ProductsPage({ categoryId, onNavigate }: ProductsPageProps) {
               <span className="text-xs font-medium">{brand}</span>
             </label>
           ))}
+          {brands.length > 5 && (
+            <button
+              onClick={() => setShowMoreBrands(!showMoreBrands)}
+              className="text-xs text-black font-semibold mt-2 hover:underline text-left w-full"
+            >
+              {showMoreBrands ? 'See Less' : 'See More'}
+            </button>
+          )}
         </div>
       </div>
 

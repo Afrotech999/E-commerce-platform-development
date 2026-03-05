@@ -91,27 +91,25 @@ export function UsedPage({ onNavigate }: UsedPageProps) {
             <div className="flex items-center gap-2 bg-gray-50 rounded-full px-2 py-2">
               <button
                 onClick={() => setSortBy('price-low')}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  sortBy === 'price-low'
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${sortBy === 'price-low'
                     ? 'bg-white shadow-sm text-gray-900'
                     : 'text-gray-600 hover:text-gray-900'
-                }`}
+                  }`}
               >
                 Price: Low
               </button>
 
               <button
                 onClick={() => setSortBy('price-high')}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  sortBy === 'price-high'
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${sortBy === 'price-high'
                     ? 'bg-white shadow-sm text-gray-900'
                     : 'text-gray-600 hover:text-gray-900'
-                }`}
+                  }`}
               >
                 Price: High
               </button>
 
-              
+
             </div>
           </div>
         </div>
@@ -132,9 +130,9 @@ export function UsedPage({ onNavigate }: UsedPageProps) {
                 transition={{ delay: index * 0.05, duration: 0.3 }}
                 className="relative"
               >
-                <div className="absolute top-3 left-3 z-10 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">
+                {/* <div className="absolute top-3 left-3 z-10 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">
                   Used
-                </div>
+                </div> */}
                 <ProductCard product={product} onNavigate={onNavigate} />
               </motion.div>
             ))}

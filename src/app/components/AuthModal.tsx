@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 
@@ -13,13 +12,10 @@ interface AuthModalProps {
   defaultTab?: 'login' | 'register';
 }
 
-export function AuthModal({ open, onOpenChange, defaultTab = 'login' }: AuthModalProps) {
-  const { login, register } = useAuth();
+export function AuthModal({ open, onOpenChange }: AuthModalProps) {
+  const { login } = useAuth();
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
-  const [registerName, setRegisterName] = useState('');
-  const [registerEmail, setRegisterEmail] = useState('');
-  const [registerPassword, setRegisterPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -31,7 +27,7 @@ export function AuthModal({ open, onOpenChange, defaultTab = 'login' }: AuthModa
     setLoading(true);
     try {
       await login(loginEmail.trim(), loginPassword);
-      toast.success('Welcome back!');
+      toast.success('Welcome back, Admin!');
       onOpenChange(false);
       setLoginEmail('');
       setLoginPassword('');
@@ -42,118 +38,58 @@ export function AuthModal({ open, onOpenChange, defaultTab = 'login' }: AuthModa
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!registerName.trim() || !registerEmail.trim() || !registerPassword) {
-      toast.error('Please fill in all fields');
-      return;
-    }
-    if (registerPassword.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return;
-    }
-    setLoading(true);
-    try {
-      await register(registerName.trim(), registerEmail.trim(), registerPassword);
-      toast.success('Account created!');
-      onOpenChange(false);
-      setRegisterName('');
-      setRegisterEmail('');
-      setRegisterPassword('');
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Registration failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md p-0 gap-0">
-        <DialogHeader className="border-b p-6 pb-4">
-          <DialogTitle>Sign in to ClickSuq</DialogTitle>
-          <p className="text-sm text-gray-500">Access your profile and orders</p>
-        </DialogHeader>
-        <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className="w-full grid grid-cols-2 rounded-none border-b bg-transparent p-0 h-12">
-            <TabsTrigger value="login" className="rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:shadow-none">Log in</TabsTrigger>
-            <TabsTrigger value="register" className="rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:shadow-none">Sign up</TabsTrigger>
-          </TabsList>
-          <TabsContent value="login" className="p-6 pt-4">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <Label htmlFor="login-email">Email</Label>
-                <Input
-                  id="login-email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  className="mt-1.5"
-                  autoComplete="email"
-                />
+      <DialogContent className="max-w-md p-0 gap-0 overflow-hidden rounded-xl border-none shadow-2xl">
+        <div className="bg-black p-8 text-center text-white">
+          <DialogHeader className="p-0">
+            <DialogTitle className="text-2xl font-bold tracking-tight text-white">Admin Login</DialogTitle>
+            <p className="mt-2 text-sm text-gray-400">Enter your credentials to manage Clicksuq</p>
+          </DialogHeader>
+        </div>
+
+        <div className="p-8 pb-10">
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="login-email" className="text-sm font-semibold text-gray-700">Email Address</Label>
+              <Input
+                id="login-email"
+                type="email"
+                placeholder="admin@gmail.com"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                className="h-11 border-gray-200 focus:border-black focus:ring-black transition-all"
+                autoComplete="email"
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="login-password" className="text-sm font-semibold text-gray-700">Password</Label>
               </div>
-              <div>
-                <Label htmlFor="login-password">Password</Label>
-                <Input
-                  id="login-password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  className="mt-1.5"
-                  autoComplete="current-password"
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Signing in...' : 'Log in'}
-              </Button>
-            </form>
-          </TabsContent>
-          <TabsContent value="register" className="p-6 pt-4">
-            <form onSubmit={handleRegister} className="space-y-4">
-              <div>
-                <Label htmlFor="register-name">Name</Label>
-                <Input
-                  id="register-name"
-                  type="text"
-                  placeholder="Your name"
-                  value={registerName}
-                  onChange={(e) => setRegisterName(e.target.value)}
-                  className="mt-1.5"
-                  autoComplete="name"
-                />
-              </div>
-              <div>
-                <Label htmlFor="register-email">Email</Label>
-                <Input
-                  id="register-email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={registerEmail}
-                  onChange={(e) => setRegisterEmail(e.target.value)}
-                  className="mt-1.5"
-                  autoComplete="email"
-                />
-              </div>
-              <div>
-                <Label htmlFor="register-password">Password</Label>
-                <Input
-                  id="register-password"
-                  type="password"
-                  placeholder="At least 6 characters"
-                  value={registerPassword}
-                  onChange={(e) => setRegisterPassword(e.target.value)}
-                  className="mt-1.5"
-                  autoComplete="new-password"
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Creating account...' : 'Create account'}
-              </Button>
-            </form>
-          </TabsContent>
-        </Tabs>
+              <Input
+                id="login-password"
+                type="password"
+                placeholder="••••••••"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                className="h-11 border-gray-200 focus:border-black focus:ring-black transition-all"
+                autoComplete="current-password"
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full h-12 bg-black hover:bg-black/90 text-white font-bold rounded-lg transition-all shadow-lg active:scale-[0.98]"
+              disabled={loading}
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                  Authenticating...
+                </span>
+              ) : 'Sign In to Dashboard'}
+            </Button>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

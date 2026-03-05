@@ -8,6 +8,7 @@ import { useProduct } from '../../hooks/useApi';
 import { fetchProducts } from '../../api/products';
 import type { Product } from '../../types';
 import { LoadingState } from './LoadingState';
+import { toast } from 'sonner';
 
 interface ProductPageProps {
   productId: string;
@@ -30,6 +31,23 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
     return v == null || v === '' ? null : Number(v);
   }, [product]);
   const stock = useMemo(() => Number((product as any)?.stock ?? 0), [product]);
+
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: product?.name || 'Clicksuq',
+          text: `Check out ${product?.name} on Clicksuq!`,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Link copied to clipboard!");
+      }
+    } catch (error) {
+      console.error("Error sharing:", error);
+    }
+  };
 
   useEffect(() => {
     if (!product) return;
@@ -107,11 +125,10 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
                   key={`${image}-${index}`}
                   type="button"
                   onClick={() => setSelectedImage(index)}
-                  className={`aspect-square overflow-hidden rounded-lg border-2 transition-all ${
-                    selectedImage === index
-                      ? 'border-gray-900 ring-2 ring-gray-900/20'
-                      : 'border-transparent hover:border-gray-300'
-                  }`}
+                  className={`aspect-square overflow-hidden rounded-lg border-2 transition-all ${selectedImage === index
+                    ? 'border-gray-900 ring-2 ring-gray-900/20'
+                    : 'border-transparent hover:border-gray-300'
+                    }`}
                 >
                   <img
                     src={image}
@@ -194,10 +211,10 @@ export function ProductPage({ productId, onNavigate }: ProductPageProps) {
                   Contact to Buy
                 </Button>
 
-                <Button variant="outline" size="icon" className="h-12 w-12">
+                {/* <Button variant="outline" size="icon" className="h-12 w-12">
                   <Heart className="h-5 w-5" />
-                </Button>
-                <Button variant="outline" size="icon" className="h-12 w-12">
+                </Button> */}
+                <Button variant="outline" size="icon" className="h-12 w-12" onClick={handleShare}>
                   <Share2 className="h-5 w-5" />
                 </Button>
               </div>

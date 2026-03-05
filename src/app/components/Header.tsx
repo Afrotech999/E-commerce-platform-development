@@ -48,48 +48,47 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-all duration-300 ${
-        isScrolled
+      className={`sticky top-0 z-40 transition-all duration-300 ${isScrolled
           ? 'bg-white/[0.012] backdrop-blur-md shadow-sm border-b border-white/[0.003]'
           : 'bg-white/[0.0005] border-b border-white/[0.001]'
-      }`}
+        }`}
     >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* ✅ LOGO FIX: force big size + crop transparent padding */}
           <motion.button
-  onClick={() => onNavigate('home')}
-  whileHover={{ scale: 1.02 }}
-  whileTap={{ scale: 0.98 }}
-  aria-label="Go to home"
-  type="button"
-  style={{ display: 'flex', alignItems: 'center' }}
->
-  <div
-    style={{
-      width: 140,          // ✅ wider so it won’t cut
-      height: 56,          // ✅ good for header
-      overflow: 'hidden',  // keep cropping transparent padding
-      display: 'flex',
-      alignItems: 'center',
-    }}
-  >
-    <img
-      src={clicksuqLogo}
-      alt="Clicksuq"
-      style={{
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',          // crops empty padding
-        objectPosition: 'left center',
-        transform: 'scale(1.15)',    // ✅ reduce scale so right side fits
-        transformOrigin: 'left center',
-        display: 'block',
-      }}
-      draggable={false}
-    />
-  </div>
-</motion.button>
+            onClick={() => onNavigate('home')}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            aria-label="Go to home"
+            type="button"
+            style={{ display: 'flex', alignItems: 'center' }}
+          >
+            <div
+              style={{
+                width: 140,          // ✅ wider so it won’t cut
+                height: 56,          // ✅ good for header
+                overflow: 'hidden',  // keep cropping transparent padding
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <img
+                src={clicksuqLogo}
+                alt="Clicksuq"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',          // crops empty padding
+                  objectPosition: 'left center',
+                  transform: 'scale(1.15)',    // ✅ reduce scale so right side fits
+                  transformOrigin: 'left center',
+                  display: 'block',
+                }}
+                draggable={false}
+              />
+            </div>
+          </motion.button>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-3 bg-gray-50 rounded-full px-2 py-2">
@@ -299,7 +298,7 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
                             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100">
                               <User className="h-4 w-4 text-gray-600" />
                             </span>
-                            Sign in
+                            Admin Login
                           </button>
                         </SheetClose>
                       )}
