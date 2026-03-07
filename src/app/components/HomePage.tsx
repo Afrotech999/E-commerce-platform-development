@@ -119,19 +119,19 @@ export function HomePage({ onNavigate }: HomePageProps) {
   const heroSlidesToShow =
     heroSlidesFromApi.length > 0
       ? heroSlidesFromApi.map((s) => ({
-          image: s.image,
-          title: s.title,
-          subtitle: s.subtitle,
-          cta: s.cta,
-          link: s.link,
-        }))
+        image: s.image,
+        title: s.title,
+        subtitle: s.subtitle,
+        cta: s.cta,
+        link: s.link,
+      }))
       : heroSlidesMock.map((s) => ({
-          image: s.image,
-          title: s.title,
-          subtitle: s.subtitle,
-          cta: s.cta,
-          link: s.link,
-        }));
+        image: s.image,
+        title: s.title,
+        subtitle: s.subtitle,
+        cta: s.cta,
+        link: s.link,
+      }));
 
   if (loading) return <LoadingState />;
 
@@ -150,14 +150,6 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Top Admin Button */}
-      {isAdmin && (
-        <div className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 pt-3 flex justify-end">
-          <Button variant="outline" className="h-9 text-sm gap-2" onClick={() => onNavigate('admin')}>
-            <Shield className="h-4 w-4" /> Admin
-          </Button>
-        </div>
-      )}
 
       {/* Hero Section */}
       <section className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4">

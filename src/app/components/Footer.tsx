@@ -105,13 +105,7 @@ export function Footer({ onOpenContent, onNavigate }: FooterProps) {
             <p className="text-xs sm:text-sm text-white/70">
               © {currentYear} ClickSuq. All rights reserved.
             </p>
-            <button
-              type="button"
-              onClick={() => onNavigate('admin')}
-              className="text-xs sm:text-sm text-white/50 hover:text-white/80 transition-colors"
-            >
-              Site management
-            </button>
+
             <a
               href="https://loomsolutions.net/"
               target="_blank"

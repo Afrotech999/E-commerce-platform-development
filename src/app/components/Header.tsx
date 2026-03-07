@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from './ui/sheet';
-import { AuthModal } from './AuthModal';
 import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -26,7 +25,6 @@ interface HeaderProps {
 export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
   const { user, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -49,8 +47,8 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
   return (
     <header
       className={`sticky top-0 z-40 transition-all duration-300 ${isScrolled
-          ? 'bg-white/[0.012] backdrop-blur-md shadow-sm border-b border-white/[0.003]'
-          : 'bg-white/[0.0005] border-b border-white/[0.001]'
+        ? 'bg-white/[0.012] backdrop-blur-md shadow-sm border-b border-white/[0.003]'
+        : 'bg-white/[0.0005] border-b border-white/[0.001]'
         }`}
     >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -122,7 +120,7 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
 
             {/* User / Profile */}
             <div className="relative" ref={userMenuRef}>
-              {user ? (
+              {user && (
                 <>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button
@@ -182,21 +180,8 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
                     )}
                   </AnimatePresence>
                 </>
-              ) : (
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setAuthOpen(true)}
-                    className="h-10 w-10 rounded-full hover:bg-white hover:shadow-sm text-gray-700 transition-all"
-                  >
-                    <User className="h-5 w-5" />
-                  </Button>
-                </motion.div>
               )}
             </div>
-
-            <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
 
             {/* Mobile Menu */}
             <Sheet>
@@ -256,7 +241,7 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
                     ))}
 
                     <div className="pt-4 mt-4 border-t border-gray-100">
-                      {user ? (
+                      {user && (
                         <>
                           <SheetClose asChild>
                             <button
@@ -288,19 +273,6 @@ export function Header({ onNavigate, onSearchOpen }: HeaderProps) {
                             </button>
                           </SheetClose>
                         </>
-                      ) : (
-                        <SheetClose asChild>
-                          <button
-                            onClick={() => setAuthOpen(true)}
-                            className="w-full text-left px-4 py-3.5 rounded-xl text-[15px] font-medium text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-3"
-                            type="button"
-                          >
-                            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100">
-                              <User className="h-4 w-4 text-gray-600" />
-                            </span>
-                            Admin Login
-                          </button>
-                        </SheetClose>
                       )}
                     </div>
                   </nav>
